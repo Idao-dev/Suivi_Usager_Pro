@@ -28,22 +28,6 @@ SuiviUsagerPro est une application pour windows sans installation qui permet de 
 4. Accédez aux **Paramètres** pour configurer les options liées aux ateliers.  
 5. Commencez à ajouter des usagers via le menu principal.  
 
-
-## 🛠️ Développement
-
-### Structure du projet
-
-Voir dans [docs/specifications/Structure.md](https://github.com/Idao-dev/Suivi_Usager_Pro/blob/NewReleases/docs/specifications/Structure.md)
-
-### Création de l'exécutable
-Voir les instructions détaillées dans `[docs/DEVBOOK.md](https://github.com/Idao-dev/Suivi_Usager_Pro/blob/NewReleases/docs/DEVBOOK.md)` section 2.5.
-
-Points importants :
-- Utilisation d'un fichier spec personnalisé
-- Structure des ressources optimisée
-- Taille de l'exécutable : ~66 MB
-- Création automatique des dossiers et fichiers nécessaires au premier lancement
-
 ## 🔒 **Sécurité et RGPD**
 
 - Les données sont stockées localement sur votre machine.  
