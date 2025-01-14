@@ -1,0 +1,128 @@
+Spécifications Fonctionnelles et Techniques pour le Développement d'un Logiciel de Gestion des Usagers
+Objectif Principal :
+
+Le logiciel a pour but de permettre la gestion fluide et intuitive des usagers, incluant leurs informations personnelles, un suivi des actions réalisées (ateliers ou démarches administratives), et une synthèse sous forme de tableaux analytiques pour identifier les types d'ateliers les plus demandés. Le logiciel doit également permettre l'ajout futur de fonctionnalités.
+1. Spécifications Fonctionnelles
+A. Tableau de Bord (Dashboard) :
+
+    Récapitulatif des Ateliers :
+        Génération automatique d'un tableau graphique récapitulatif des ateliers réalisés mois par mois.
+        Nombre d'ateliers effectués par type (exemple : Atelier individuel, Démarche administrative).
+        Indication visuelle des ateliers payants et gratuits.
+    Suivi des Usagers :
+        Nombre total d'usagers inscrits dans le logiciel.
+        Nombre d'ateliers réalisés depuis le début de l'année.
+        Historique des derniers usagers venus avec leurs noms, prénoms, types d’ateliers, triés par ordre décroissant.
+
+B. Création d'Usager :
+
+    Informations à Recueillir :
+        Nom, prénom, date de naissance, numéro de téléphone, mail, adresse postale.
+        Un bouton pour ajouter un nouvel usager et un lien d'accès à cette page dans le menu fixe de gauche.
+
+C. Mise à Jour et Suivi des Usagers :
+
+    Modification des Informations :
+        Interface permettant la modification des informations d’un usager existant.
+        Historique des actions réalisées pour chaque usager.
+        Possibilité d'ajouter des ateliers avec une zone de texte pour la description, un indicateur du type d’atelier, et un indicateur pour préciser si l'atelier est payant ou non.
+
+D. Interface Fixe :
+
+    Partie Gauche (Menu) :
+        Le menu à gauche est fixe et permet un accès rapide aux différentes sections : Accueil, Ajouter un Usager, Recherche.
+        Bouton Paramètres : Accessible via le menu, il permet d'accéder aux options suivantes :
+            Gestion des Conseillers Numériques : Création et suppression de conseillers numériques.
+            Paramètres de l'Interface : Ajustements de l'affichage et des options utilisateur.
+            Gestion de la RGPD : Cette fonctionnalité permet de gérer la suppression des données des usagers qui n'ont pas été actifs ou présents dans le système pendant plus d'un an. Elle comprend :
+                Un outil de suppression automatique ou manuelle des usagers inactifs de plus d'un an pour respecter les directives RGPD.
+                Des notifications ou rappels pour informer de la suppression prochaine des données des usagers concernés.
+                Possibilité d’exporter les données avant suppression si nécessaire.
+
+    Partie Haute (Barre de Recherche et Nom du Conseiller) :
+        La barre de recherche et le nom du conseiller connecté sont fixes en haut de l'écran. Le nom du conseiller sera utilisé lors de l'ajout d'une entrée dans la base de données afin de tracer quelle action a été effectuée par quel conseiller.
+
+E. Base de Données :
+
+    Stockage des Usagers :
+        Table Usagers : ID usager, Nom, prénom, date de naissance, numéro de téléphone, mail, adresse postale, date de création de l’usager.
+
+    Stockage des Ateliers :
+        Table Donner : ID usager, description de l’action, catégorie (atelier/démarche), payant ou non, date.
+
+    Exportation CSV : Export obligatoire des données usagers en format CSV.
+
+2. Spécifications Techniques
+A. Langage de Programmation :
+
+    Python pour l’ensemble du développement.
+
+B. Base de Données :
+
+    SQLite pour le stockage des informations utilisateurs, en raison de sa simplicité et de sa portabilité.
+
+C. Interface Graphique :
+
+    Utilisation de CustomTkinter pour une interface utilisateur simple et portable.
+    Utilisation de PySide2 si une interface plus riche est nécessaire.
+
+D. Normes de Codage :
+
+    Respect des recommandations PEP8 pour le style de code Python.
+    Utilisation de docstrings et de commentaires pour rendre le code lisible et maintenable.
+
+E. Fonctionnalités Complémentaires (Optionnelles pour l'évolutivité) :
+
+    Notifications et rappels : Possibilité d’ajouter des rappels pour les usagers ou les démarches administratives à venir.
+
+3. Exigences Non-Fonctionnelles
+A. Évolutivité :
+
+    Conception modulaire pour permettre l’ajout facile de nouvelles fonctionnalités (gestion des paiements, génération de rapports, etc.).
+
+B. Test et Maintenance :
+
+    Tous les modules doivent être testés avec des tests unitaires (utilisation du module unittest en Python) et des tests d'intégration.
+    Documentation du code pour faciliter la maintenance future.
+
+C. Plan de Sauvegarde et Récupération :
+
+    Développer un plan de sauvegarde régulier de la base de données (backup automatique).
+
+D. Gestion de la RGPD :
+
+    Mise en place d'un module permettant la gestion de la conformité à la RGPD pour la suppression des données des usagers inactifs depuis plus d'un an.
+        Possibilité d’automatiser cette suppression ou d'envoyer des notifications pour une suppression manuelle.
+        S’assurer que les usagers concernés soient notifiés avant toute suppression.
+        Export possible des données des usagers avant suppression, à des fins d'archivage si nécessaire.
+
+4. Gestion des Conseillers Numériques (Paramètres)
+
+    Création et Suppression de Conseillers :
+        Dans la section "Paramètres", possibilité de créer et de supprimer des conseillers numériques.
+        Cette fonctionnalité ne nécessite pas de gestion de rôles (administrateurs, utilisateurs, etc.).
+
+5. Structure Recommandée du Projet
+A. Base de Données :
+
+    Table Usagers : ID usager, Nom, prénom, date de naissance, Numéro de téléphone, Mail, Adresse postale, date de création.
+    Table Données : ID usager, description de l’action, catégorie (atelier/démarche), payant ou non, date.
+
+B. Modules Principaux :
+
+    Gestion des Usagers (ajout, modification, suppression).
+    Gestion des Ateliers (ajout, modification, suppression des démarches ou ateliers réalisés).
+    Interface Utilisateur pour les Conseillers Numériques (formulaire de création, modification des conseillers numériques dans le menu Paramètres).
+    Génération de Rapports/Statistiques (rapport mensuel, export CSV).
+    Gestion de la RGPD (suppression des usagers inactifs de plus d'un an, notifications, export).
+
+C. Tests :
+
+    Tests Unitaires pour chaque fonction clé du programme.
+    Tests d'Intégration pour garantir que toutes les parties du programme fonctionnent correctement ensemble.
+
+6. Technologies Recommandées :
+
+    Python : Langage principal.
+    SQLite : Base de données embarquée.
+    Tkinter/PyQt : Pour l’interface graphique, en fonction des besoins en richesses de l’interface.

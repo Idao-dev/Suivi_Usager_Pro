@@ -1,0 +1,100 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Environnements virtuels
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# IDE - PyCharm
+.idea/
+*.iml
+*.iws
+.idea_modules/
+
+# IDE - Cursor
+.cursorignore
+
+# Fichiers de base de données
+*.db
+*.db-journal
+data/*.db
+data/suivi_usager.db
+
+# Fichiers d'export et données temporaires
+data/exports/*
+!data/exports/.gitkeep
+*.csv
+*.xlsx
+*.xls
+
+# Logs et fichiers temporaires
+*.log
+app.log
+logs/
+temp/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+.coverage.*
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Fichiers de configuration spécifiques à l'environnement
+config.local.json
+.env.local
+*.local.py
+
+# Dossiers de build et distribution
+build/
+dist/
+*.spec
+
+# Documentation générée
+docs/_build/
+site/
+
+# Exceptions - Fichiers à inclure malgré les règles ci-dessus
+!data/.gitkeep
+!data/exports/.gitkeep
+!requirements.txt
+!setup.py

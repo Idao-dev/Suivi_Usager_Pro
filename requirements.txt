@@ -1,0 +1,12 @@
+# Dépendances du projet
+customtkinter==5.2.2
+matplotlib==3.8.2
+python-dateutil==2.8.2
+Pillow==10.4.0
+appdirs==1.4.4
+
+# Dépendances de développement
+pytest==7.4.3
+pytest-cov==4.1.0
+
+# Note: Ce projet utilise SQLite 3.45.1 ou supérieur (inclus avec Python)
