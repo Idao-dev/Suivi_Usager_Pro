@@ -5,7 +5,7 @@
     "current_conseiller": "Test",
     "ateliers_entre_paiements": 5,
     "default_paid_workshops": [
-        "Atelier numérique"
+        "Atelier num\u00c3\u00a9rique"
     ],
     "dark_mode": true,
     "inactivity_period": "12"
