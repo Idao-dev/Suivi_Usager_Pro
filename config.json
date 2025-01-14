@@ -1,11 +1,12 @@
 {
     "conseillers": [
-        "Test"
+        "Test",
+        "Pseudo_utilisateur"
     ],
-    "current_conseiller": "Test",
+    "current_conseiller": "Pseudo_utilisateur",
     "ateliers_entre_paiements": 5,
     "default_paid_workshops": [
-        "Atelier numérique"
+        "Atelier num\u00c3\u00a9rique"
     ],
     "dark_mode": true,
     "inactivity_period": "12"
