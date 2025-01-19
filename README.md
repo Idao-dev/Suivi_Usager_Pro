@@ -28,7 +28,7 @@ SuiviUsagerPro est une application pour windows sans installation qui permet de 
 4. Accédez aux **Paramètres** pour configurer les options liées aux ateliers.  
 5. Commencez à ajouter des usagers via le menu principal.  
 
-## 🔒 **Sécurité et RGPD**
+## **Donnée**
 
 - Les données sont stockées localement sur votre machine.  
 - Exportation des données disponible au format CSV.  
