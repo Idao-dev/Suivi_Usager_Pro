@@ -1,21 +1,36 @@
 import unittest
 import os
-from src.config import load_config, save_config, add_conseiller, remove_conseiller, get_current_conseiller, set_current_conseiller
+import tempfile
+import json
+
+# Importer les fonctions individuellement pour éviter les problèmes de portée globale
+from src.utils.config_utils import add_conseiller, remove_conseiller, load_config, save_config, get_current_conseiller, set_current_conseiller
 
 class TestConfig(unittest.TestCase):
+    """Tests pour le module de configuration."""
+    
     def setUp(self):
-        self.test_config_file = "test_config.json"
-        self.original_config_file = "config.json"
-        os.environ["CONFIG_FILE"] = self.test_config_file
+        # Créer un fichier temporaire pour la configuration
+        self.temp_file = tempfile.NamedTemporaryFile(delete=False)
+        self.temp_file.close()
         
-        # Réinitialiser la configuration pour chaque test
-        initial_config = {"conseillers": [], "current_conseiller": ""}
-        save_config(initial_config)
+        # Sauvegarder le chemin original et définir le chemin temporaire
+        from src.utils.config_utils import CONFIG_FILE as ORIGINAL_CONFIG_FILE
+        self.original_config_file = ORIGINAL_CONFIG_FILE
+        
+        # Définir le fichier temporaire comme configuration
+        os.environ["CONFIG_FILE"] = self.temp_file.name
+        
+        # Initialiser avec une configuration vide
+        with open(self.temp_file.name, 'w') as f:
+            json.dump({"conseillers": [], "current_conseiller": ""}, f)
 
     def tearDown(self):
-        if os.path.exists(self.test_config_file):
-            os.remove(self.test_config_file)
+        # Restaurer le chemin de configuration original
         os.environ["CONFIG_FILE"] = self.original_config_file
+        
+        # Supprimer le fichier temporaire
+        os.unlink(self.temp_file.name)
 
     def test_load_and_save_config(self):
         config = load_config()

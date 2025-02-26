@@ -213,5 +213,5 @@ class EditWorkshop(ctk.CTkFrame):
     def update_payment_status(self):
         """Met à jour l'affichage du statut de paiement."""
         if self.user:
-            status = self.user.get_workshop_payment_status(self.db_manager)
+            status, details = self.user.get_workshop_payment_status(self.db_manager)
             self.payment_status_value.configure(text=status)

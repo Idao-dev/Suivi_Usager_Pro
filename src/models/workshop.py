@@ -7,8 +7,11 @@ Gère le stockage, la récupération et la mise à jour des ateliers dans la bas
 from src.utils.date_utils import convert_to_db_date, convert_from_db_date
 from datetime import datetime
 import logging
-from src.models.user import User
+from typing import Dict, Any, Optional, TYPE_CHECKING
 from src.utils.observer import Observable
+
+if TYPE_CHECKING:
+    from src.models.user import User
 
 
 
@@ -275,13 +278,15 @@ class Workshop(Observable):
         Returns:
             User: Instance de l'utilisateur associé ou None
         """
-        from models.user import User  # Import local pour éviter les imports circulaires
+        # Import à l'intérieur de la méthode pour éviter les importations circulaires
+        from src.models.user import User
+        if not hasattr(self, 'db_manager'):
+            return None
         return User.get_by_id(self.db_manager, self.user_id) if self.user_id else None
 
     def get_user(self, db_manager):
         """
-        Récupère l'utilisateur associé à l'atelier.
-        Méthode alternative à la propriété user.
+        Récupère l'utilisateur associé à cet atelier.
         
         Args:
             db_manager: Gestionnaire de base de données
@@ -289,7 +294,8 @@ class Workshop(Observable):
         Returns:
             User: Instance de l'utilisateur associé ou None
         """
-        from models.user import User  # Import local pour éviter les imports circulaires
+        # Import à l'intérieur de la méthode pour éviter les importations circulaires
+        from src.models.user import User
         return User.get_by_id(db_manager, self.user_id) if self.user_id else None
 
     def refresh_user_list(self):

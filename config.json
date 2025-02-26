@@ -1,13 +1,8 @@
 {
     "conseillers": [
-        "Test",
-        "Pseudo_utilisateur"
+        "Idao"
     ],
-    "current_conseiller": "Pseudo_utilisateur",
-    "ateliers_entre_paiements": 5,
-    "default_paid_workshops": [
-        "Atelier num\u00c3\u00a9rique"
-    ],
-    "dark_mode": true,
-    "inactivity_period": "12"
+    "current_conseiller": "Idao",
+    "test_key": "test_value",
+    "dark_mode": true
 }

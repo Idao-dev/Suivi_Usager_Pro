@@ -334,25 +334,33 @@ class MainWindow(ctk.CTkFrame):
         self.add_user.pack(fill="both", expand=True)
         self.current_frame = self.add_user
 
-    def edit_user(self, user):
+    def edit_user(self, user, show_add_workshop=False):
         """
         Affiche l'interface d'édition d'un usager existant.
         
         Args:
             user: Instance de l'usager à éditer
+            show_add_workshop (bool): Si True, redirige vers la page d'ajout d'atelier après chargement
         """
         self.clear_main_content()
-        self.user_edit = UserEditFrame(
-            self.main_content,
-            self.db_manager,
-            user,
-            show_user_management_callback=self.show_user_management,
-            show_add_workshop_callback=self.show_add_workshop,
-            edit_workshop_callback=self.show_edit_workshop,
-            update_callback=self.update_all_sections
-        )
-        self.user_edit.pack(fill="both", expand=True)
-        self.current_frame = self.user_edit
+        
+        if show_add_workshop:
+            # Rediriger directement vers la page d'ajout d'atelier
+            logging.debug(f"Redirection directe vers l'ajout d'atelier pour l'utilisateur {user.id}")
+            self.show_add_workshop(user)
+        else:
+            # Afficher la page d'édition de l'utilisateur
+            self.user_edit = UserEditFrame(
+                self.main_content,
+                self.db_manager,
+                user,
+                show_user_management_callback=self.show_user_management,
+                show_add_workshop_callback=self.show_add_workshop,
+                edit_workshop_callback=self.show_edit_workshop,
+                update_callback=self.update_all_sections
+            )
+            self.user_edit.pack(fill="both", expand=True)
+            self.current_frame = self.user_edit
 
     def clear_main_content(self):
         """

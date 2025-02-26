@@ -1,7 +1,7 @@
-from .test_base import BaseTestCase
-from ui.settings import Settings
+from tests.test_base import BaseTestCase
+from src.ui.settings import Settings
 import customtkinter as ctk
-from src.config import get_conseillers, get_current_conseiller, add_conseiller, remove_conseiller
+from src.utils.config_utils import get_conseillers, get_current_conseiller, add_conseiller, remove_conseiller
 
 class TestSettings(BaseTestCase):
     def setUp(self):

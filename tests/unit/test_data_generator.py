@@ -1,7 +1,7 @@
 import random
 from datetime import datetime, timedelta
-from models.user import User
-from models.workshop import Workshop
+from src.models.user import User
+from src.models.workshop import Workshop
 
 def generate_test_data(db_manager):
     # Générer des utilisateurs

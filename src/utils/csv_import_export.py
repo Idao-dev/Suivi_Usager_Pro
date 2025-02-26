@@ -133,13 +133,36 @@ class CSVExporter(Observable):
                         workshop.categorie,
                         'Oui' if workshop.payant else 'Non',
                         'Oui' if workshop.paid else 'Non',
-                        convert_from_db_date(workshop.date),
+                        convert_from_db_date(workshop.date) if workshop.date else '',
                         workshop.conseiller
                     ])
             return True, file_path
         except Exception as e:
             logging.error(f"Erreur lors de l'exportation des ateliers : {str(e)}", exc_info=True)
             return False, f"Une erreur s'est produite lors de l'exportation des ateliers : {str(e)}"
+
+    def export_all_data(self):
+        """
+        Exporte à la fois les utilisateurs et les ateliers dans des fichiers CSV distincts.
+        
+        Returns:
+            tuple: (bool, str) Succès/échec et message de résultat
+        """
+        try:
+            # Exporter les utilisateurs
+            users_success, users_path = self.export_users()
+            if not users_success:
+                return False, f"Échec de l'exportation des utilisateurs: {users_path}"
+            
+            # Exporter les ateliers
+            workshops_success, workshops_path = self.export_workshops()
+            if not workshops_success:
+                return False, f"Échec de l'exportation des ateliers: {workshops_path}"
+            
+            return True, f"Utilisateurs exportés vers {users_path}\nAteliers exportés vers {workshops_path}"
+        except Exception as e:
+            logging.error(f"Erreur lors de l'exportation complète des données : {str(e)}", exc_info=True)
+            return False, f"Une erreur s'est produite lors de l'exportation des données : {str(e)}"
 
     def import_data(self, file_path):
         """

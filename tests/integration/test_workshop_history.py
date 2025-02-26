@@ -1,7 +1,7 @@
 from ..test_base import BaseTestCase
-from ui.workshop_history import WorkshopHistory
-from models.user import User
-from models.workshop import Workshop
+from src.ui.workshop_history import WorkshopHistory
+from src.models.user import User
+from src.models.workshop import Workshop
 import customtkinter as ctk
 
 class TestWorkshopHistory(BaseTestCase):

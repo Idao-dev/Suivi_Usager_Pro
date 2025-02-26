@@ -28,7 +28,6 @@ class TestUserManagement(BaseUITestCase):
         if hasattr(cls, 'root') and cls.root is not None:
             try:
                 cls.root.quit()
-                cls.root.destroy()
             except:
                 pass
         super().tearDownClass()
@@ -89,8 +88,7 @@ class TestUserManagement(BaseUITestCase):
             user.save(self.db_manager)
 
         # Tester la recherche
-        self.user_management.search_entry.insert(0, "Dup")
-        self.user_management.perform_search()
+        self.user_management.search_users("Dup")
 
         # Vérifier les résultats
         search_results = self.user_management.get_search_results()

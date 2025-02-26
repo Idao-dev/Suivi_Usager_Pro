@@ -1,7 +1,13 @@
 import unittest
-from ..test_base import BaseTestCase
-from models.user import User
-from models.workshop import Workshop
+import sys
+import os
+
+# Ajouter le répertoire racine du projet au chemin d'importation
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
+from tests.test_base import BaseTestCase
+from src.models.user import User
+from src.models.workshop import Workshop
 
 class TestUserWorkshopIntegration(BaseTestCase):
     def test_user_workshop_creation(self):
@@ -27,5 +33,10 @@ class TestUserWorkshopIntegration(BaseTestCase):
 
         User.delete(self.db_manager, user.id)
 
+        # Vérifier que l'utilisateur a été supprimé
         self.assertIsNone(User.get_by_id(self.db_manager, user.id))
-        self.assertIsNone(Workshop.get_by_id(self.db_manager, workshop.id))
+        
+        # Vérifier que l'atelier existe toujours mais avec user_id = NULL
+        updated_workshop = Workshop.get_by_id(self.db_manager, workshop.id)
+        self.assertIsNotNone(updated_workshop)
+        self.assertIsNone(updated_workshop.user_id)

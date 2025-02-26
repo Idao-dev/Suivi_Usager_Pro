@@ -9,11 +9,11 @@ import queue
 import sqlite3
 import tempfile
 
-# Ajoutez le répertoire parent au chemin Python
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+# Ajoutez le répertoire racine du projet au chemin Python
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
-from ui.main_window import MainWindow
-from database.db_manager import DatabaseManager
+from src.ui.main_window import MainWindow
+from src.database.db_manager import DatabaseManager
 import logging
 
 logging.basicConfig(level=logging.DEBUG)

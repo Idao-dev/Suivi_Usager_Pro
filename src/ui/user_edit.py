@@ -318,7 +318,7 @@ class UserEditFrame(ctk.CTkFrame, Observer):
 
     def update_payment_status(self):
         self.user.calculate_workshop_payment_status(self.db_manager)  # Ajoutez cette ligne
-        status = self.user.get_workshop_payment_status(self.db_manager)
+        status, details = self.user.get_workshop_payment_status(self.db_manager)
         self.payment_status_value.configure(text=status)
 
     def update(self, observable, *args, **kwargs):

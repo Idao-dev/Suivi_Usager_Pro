@@ -9,6 +9,10 @@ from datetime import datetime, timedelta
 from src.utils.config_utils import get_ateliers_entre_paiements, get_default_paid_workshops
 import logging
 from src.utils.observer import Observable
+from typing import List, Dict, Any, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.models.workshop import Workshop
 
 
 
@@ -225,9 +229,16 @@ class User(Observable):
     @classmethod
     def delete(cls, db_manager, user_id):
         # Mettre à jour les ateliers associés pour définir user_id à NULL
-        db_manager.execute("UPDATE workshops SET user_id = NULL WHERE user_id = ?", (user_id,))
-        # Ensuite, supprimez l'utilisateur
-        db_manager.execute("DELETE FROM users WHERE id = ?", (user_id,))
+        try:
+            logging.info(f"Tentative de suppression de l'utilisateur avec l'ID {user_id}")
+            db_manager.execute("UPDATE workshops SET user_id = NULL WHERE user_id = ?", (user_id,))
+            # Ensuite, supprimez l'utilisateur
+            db_manager.execute("DELETE FROM users WHERE id = ?", (user_id,))
+            logging.info(f"Utilisateur avec l'ID {user_id} supprimé avec succès")
+            return True
+        except Exception as e:
+            logging.error(f"Erreur lors de la suppression de l'utilisateur {user_id}: {str(e)}", exc_info=True)
+            raise
 
     @staticmethod
     def get_paginated(db_manager, offset, limit):
@@ -297,67 +308,63 @@ class User(Observable):
         Returns:
             str: Statut de paiement ('À jour' ou 'En retard')
         """
+        # Import à l'intérieur de la méthode pour éviter les importations circulaires
+        from src.models.workshop import Workshop
+        
         ateliers_entre_paiements = get_ateliers_entre_paiements()
         default_paid_workshops = get_default_paid_workshops()
         
-        query = """
-        WITH paid_workshops AS (
-            SELECT ROW_NUMBER() OVER (ORDER BY date) as row_num, paid
-            FROM workshops
-            WHERE user_id = ? AND categorie IN ({}) AND payant = 1
-            ORDER BY date
-        )
-        SELECT 
-            COUNT(*) as total_paid_workshops,
-            SUM(CASE WHEN paid = 1 THEN 1 ELSE 0 END) as total_payments_made,
-            MAX(CASE WHEN paid = 1 THEN row_num ELSE 0 END) as last_paid_workshop
-        FROM paid_workshops
-        """
-        placeholders = ','.join(['?' for _ in default_paid_workshops])
-        query = query.format(placeholders)
+        logging.info(f"Ateliers entre paiements: {ateliers_entre_paiements}")
+        logging.info(f"Ateliers payants par défaut: {default_paid_workshops}")
         
-        result = db_manager.fetch_one(query, (self.id, *default_paid_workshops))
+        if not default_paid_workshops:
+            default_paid_workshops = ['Atelier numérique']  # Valeur par défaut
         
-        if result:
-            total_paid_workshops = result['total_paid_workshops']
-            total_payments_made = result['total_payments_made']
-            last_paid_workshop = result['last_paid_workshop']
-            
-            if total_paid_workshops == 0:
-                self._payment_status = "À jour"
-            else:
-                current_cycle = (total_paid_workshops - 1) // ateliers_entre_paiements
-                paid_cycles = total_payments_made
-                
-                if paid_cycles > current_cycle:
-                    self._payment_status = "À jour"
-                elif paid_cycles == current_cycle:
-                    # Vérifie si le dernier atelier payé est dans le cycle courant
-                    if last_paid_workshop > current_cycle * ateliers_entre_paiements:
-                        self._payment_status = "À jour"
-                    else:
-                        self._payment_status = "En retard"
-                else:
-                    self._payment_status = "En retard"
-        else:
+        # 1. Récupérer les ateliers de l'utilisateur
+        workshops = Workshop.get_user_workshops(db_manager, self.id)
+        paid_workshops = [w for w in workshops if w.payant]
+        
+        if not paid_workshops:
+            logging.info("Aucun atelier payant, statut: À jour")
             self._payment_status = "À jour"
+            return self._payment_status
+        
+        # 2. Calculer le cycle actuel et les paiements requis
+        total_paid_count = len(paid_workshops)
+        paid_count = sum(1 for w in paid_workshops if w.paid)
+        
+        current_cycle = (total_paid_count - 1) // ateliers_entre_paiements
+        required_payments = current_cycle + 1
+        
+        logging.info(f"Total ateliers payants: {total_paid_count}, Payés: {paid_count}")
+        logging.info(f"Cycle actuel: {current_cycle}, Paiements requis: {required_payments}")
+        
+        # 3. Déterminer le statut
+        if paid_count >= required_payments:
+            self._payment_status = "À jour"
+            logging.info(f"Statut: À jour ({paid_count} >= {required_payments})")
+        else:
+            self._payment_status = "En retard"
+            logging.info(f"Statut: En retard ({paid_count} < {required_payments})")
         
         return self._payment_status
 
     def get_workshop_payment_status(self, db_manager):
         """
-        Récupère le statut de paiement des ateliers.
-        Calcule le statut si nécessaire.
-        
-        Args:
-            db_manager: Gestionnaire de base de données
-            
-        Returns:
-            str: Statut de paiement actuel
+        Récupère le statut de paiement sous forme de texte.
         """
-        if not hasattr(self, '_payment_status') or self._payment_status is None:
-            self.calculate_workshop_payment_status(db_manager)
-        return self._payment_status
+        status = self.calculate_workshop_payment_status(db_manager)
+        # Le statut est directement retourné sous forme de chaîne par calculate_workshop_payment_status
+        return status, ""  # Retourne le statut et une chaîne vide pour les détails
+
+    def get_full_name(self):
+        """
+        Retourne le nom complet de l'utilisateur (prénom + nom).
+        
+        Returns:
+            str: Nom complet de l'utilisateur
+        """
+        return f"{self.prenom} {self.nom}"
 
     def update_last_payment_date(self, db_manager):
         """
@@ -394,8 +401,18 @@ class User(Observable):
         self.notify_observers('user_updated', self)
 
     def get_workshops(self, db_manager):
-        from models.workshop import Workshop  # Import local pour éviter les imports circulaires
-        return Workshop.get_by_user(db_manager, self.id)
+        """
+        Récupère tous les ateliers associés à cet utilisateur.
+        
+        Args:
+            db_manager: Instance du gestionnaire de base de données
+            
+        Returns:
+            list: Liste des ateliers associés à l'utilisateur
+        """
+        # Import à l'intérieur de la méthode pour éviter les importations circulaires
+        from src.models.workshop import Workshop
+        return Workshop.get_by_user(db_manager, self.id) if self.id else []
 
     def refresh_user_list(self):
         # Code pour rafraîchir la liste des utilisateurs
@@ -410,6 +427,30 @@ class User(Observable):
             self.last_activity_date = activity_date
             query = "UPDATE users SET last_activity_date = ? WHERE id = ?"
             db_manager.execute(query, (activity_date, self.id))
+
+    @classmethod
+    def search(cls, db_manager, search_term):
+        """
+        Recherche des utilisateurs par nom, prénom, téléphone ou email.
+        
+        Args:
+            db_manager: Gestionnaire de base de données
+            search_term (str): Terme de recherche
+            
+        Returns:
+            list: Liste des utilisateurs correspondant aux critères
+        """
+        search_pattern = f"%{search_term}%"
+        query = """
+            SELECT * FROM users 
+            WHERE nom LIKE ? 
+            OR prenom LIKE ? 
+            OR telephone LIKE ? 
+            OR email LIKE ?
+            ORDER BY nom, prenom
+        """
+        rows = db_manager.fetch_all(query, (search_pattern, search_pattern, search_pattern, search_pattern))
+        return [cls.from_db(row) for row in rows]
 
 
 

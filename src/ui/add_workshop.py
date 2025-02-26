@@ -268,7 +268,7 @@ class AddWorkshop(ctk.CTkFrame):
 
     def update_payment_status(self):
         """Met à jour l'affichage du statut de paiement."""
-        status = self.user.get_workshop_payment_status(self.db_manager)
+        status, details = self.user.get_workshop_payment_status(self.db_manager)
         self.payment_status_value.configure(text=status)
 
 # Types d'ateliers disponibles

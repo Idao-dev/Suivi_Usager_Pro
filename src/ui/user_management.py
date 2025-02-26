@@ -33,6 +33,7 @@ class UserManagement(ctk.CTkFrame, Observer):
         users (list): Liste des utilisateurs chargés
         offset (int): Décalage pour la pagination
         limit (int): Nombre d'utilisateurs par page
+        search_results (list): Liste pour stocker les résultats de recherche
     """
 
     def __init__(self, master, db_manager, edit_user_callback, edit_workshop_callback, **kwargs):
@@ -51,7 +52,8 @@ class UserManagement(ctk.CTkFrame, Observer):
         self.edit_workshop_callback = edit_workshop_callback
         self.users = []
         self.offset = 0
-        self.limit = 20
+        self.limit = 10
+        self.search_results = []  # Ajout d'un attribut pour stocker les résultats de recherche
         self.update_callback = self.update_user_list
         
         # Configuration de la grille principale
@@ -197,45 +199,48 @@ class UserManagement(ctk.CTkFrame, Observer):
         Args:
             user: Instance de l'utilisateur à supprimer
         """
-        if messagebox.askyesno("Confirmation", 
-                              f"Êtes-vous sûr de vouloir supprimer l'usager {user.nom} {user.prenom} ?"):
-            try:
-                User.delete(self.db_manager, user.id)
-                messagebox.showinfo("Suppression", 
-                                  f"L'usager {user.nom} {user.prenom} a été supprimé.")
-                self.load_users()
-            except Exception as e:
-                messagebox.showerror("Erreur", 
-                                   f"Impossible de supprimer l'usager : {str(e)}")
+        logging.debug(f"=== Début de delete_user pour l'utilisateur {user.id if user else 'None'} ===")
+        try:
+            if messagebox.askyesno("Confirmation", 
+                                f"Êtes-vous sûr de vouloir supprimer l'usager {user.nom} {user.prenom} ?"):
+                logging.debug("Suppression confirmée")
+                try:
+                    User.delete(self.db_manager, user.id)
+                    logging.debug("Utilisateur supprimé avec succès")
+                    messagebox.showinfo("Suppression", 
+                                    f"L'usager {user.nom} {user.prenom} a été supprimé.")
+                    self.load_users()
+                    logging.debug("Liste des utilisateurs rechargée")
+                except Exception as e:
+                    logging.error(f"Erreur lors de la suppression: {str(e)}", exc_info=True)
+                    messagebox.showerror("Erreur", 
+                                    f"Impossible de supprimer l'usager : {str(e)}")
+            else:
+                logging.debug("Suppression annulée par l'utilisateur")
+        except Exception as e:
+            logging.error(f"Erreur dans delete_user: {str(e)}", exc_info=True)
+            messagebox.showerror("Erreur", f"Une erreur s'est produite: {str(e)}")
 
     def add_workshop(self, user_id):
         """Affiche l'interface d'ajout d'atelier pour un usager."""
         logging.debug(f"=== Début de add_workshop pour l'utilisateur {user_id} ===")
-        from ui.add_workshop import AddWorkshop  # Import local pour éviter les imports circulaires
-        user = User.get_by_id(self.db_manager, user_id)
-        if user:
-            logging.debug("Utilisateur trouvé, création de l'interface d'ajout d'atelier")
-            # Nettoyer l'interface actuelle
-            self.clear_frame()
+        try:
+            # Récupérer l'utilisateur
+            user = User.get_by_id(self.db_manager, user_id)
+            logging.debug(f"Utilisateur récupéré: {user.id if user else 'None'}")
             
-            # Configuration de la grille
-            self.grid_columnconfigure(0, weight=1)
-            self.grid_rowconfigure(0, weight=1)
-            
-            # Créer et afficher l'interface d'ajout d'atelier
-            logging.debug("Création de la frame AddWorkshop")
-            add_workshop_frame = AddWorkshop(
-                self,
-                self.db_manager,
-                user,
-                lambda: self.edit_user_callback(user),
-                self.update_callback
-            )
-            add_workshop_frame.grid(row=0, column=0, sticky="nsew")
-            
-            logging.debug("=== Fin de add_workshop avec succès ===")
-        else:
-            logging.error(f"Utilisateur {user_id} non trouvé")
+            if user:
+                # Rediriger vers la page d'ajout d'atelier via le callback d'édition
+                # Le callback va appeler show_add_workshop dans MainWindow pour naviguer vers la page d'atelier
+                logging.debug("Navigation vers la page d'ajout d'atelier")
+                self.edit_user_callback(user, show_add_workshop=True)
+                logging.debug("Redirection effectuée vers la page d'ajout d'atelier")
+            else:
+                logging.error("Utilisateur non trouvé")
+                messagebox.showerror("Erreur", "Utilisateur non trouvé")
+        except Exception as e:
+            logging.error(f"Erreur dans add_workshop: {str(e)}", exc_info=True)
+            messagebox.showerror("Erreur", f"Une erreur s'est produite: {str(e)}")
 
     def update_user_list(self):
         # Cette méthode est appelée après l'ajout d'un atelier pour rafraîchir la liste des utilisateurs
@@ -452,7 +457,18 @@ class UserManagement(ctk.CTkFrame, Observer):
         """
         if search_term:
             users = User.search(self.db_manager, search_term)
+            self.search_results = users  # Stocker les résultats de recherche
             self.display_search_results(users)
         else:
+            self.search_results = []
             self.refresh_user_list()
+    
+    def get_search_results(self):
+        """
+        Récupère les résultats de la dernière recherche.
+        
+        Returns:
+            list: Liste des utilisateurs trouvés lors de la dernière recherche
+        """
+        return self.search_results
 

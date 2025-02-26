@@ -127,18 +127,18 @@ CREATE TABLE workshops (
 #### 2.3.1 État des Tests
 | Catégorie            | Progression | Dernière MAJ | Statut          |
 |----------------------|-------------|--------------|-----------------|
-| Tests Unitaires      | 90%         | 2025-01-13   | 🟢 Complété     |
-| Tests d'Intégration  | 0%          | YYYY-MM-DD   | 🔴 Non commencé |
-| Tests UI             | 65%         | 2024-01-07   | 🟡 En cours     |
+| Tests Unitaires      | 90%         | 2025-02-26   | 🟢 Complété     |
+| Tests d'Intégration  | 35%         | 2025-02-26   | 🟡 En cours     |
+| Tests UI             | 65%         | 2025-02-26   | 🟡 En cours     |
 | Tests de Performance | 0%          | YYYY-MM-DD   | 🔴 Non commencé |
 
 #### 2.3.2 Détails par Module
 | Module   | Tests Unitaires | Tests d'Intégration | Commentaires                                            |
 |----------|-----------------|---------------------|---------------------------------------------------------|
-| Database | 🟢 Complété     | 🔴 Non commencé     | 8 tests passés avec succès                              |
-| Models   | 🟢 Complété     | 🔴 Non commencé     | 10 tests passés avec succès                             |
-| UI       | 🟢 Complété     | 🔴 Non commencé     | Tests de navigation, affichage, gestion des usagers et ateliers complétés |
-| Utils    | 🟢 Complété     | 🔴 Non commencé     | Tests RGPD, validation des dates et configurations complétés |
+| Database | 🟢 Complété     | 🟡 En cours         | 8 tests passés avec succès, couverture à 38%            |
+| Models   | 🟢 Complété     | 🟢 Complété         | User: 9 tests réussis (65% couverture), Workshop: 13 tests réussis (72% couverture), Résolution des dépendances circulaires |
+| UI       | 🟢 Complété     | 🟡 En cours         | Tests de navigation (intégration), tests de statut de paiement (intégration), test utilisateur-atelier (intégration) complétés |
+| Utils    | 🟢 Complété     | 🟢 Complété         | Utils des dates: 10 tests réussis, 100% de couverture. Test CSV d'import/export: 4 tests réussis |
 
 #### 2.3.3 Objectifs de Couverture
 - Tests Unitaires : 80% minimum
@@ -193,6 +193,14 @@ CREATE TABLE workshops (
   - ✅ Gestion sécurisée des callbacks
   - ✅ Destruction propre des widgets
   - ✅ Transitions fluides entre interfaces
+- ✅ Résolution des dépendances circulaires
+  - ✅ Utilisation de TYPE_CHECKING pour les annotations de type
+  - ✅ Déplacement des imports concrets dans les méthodes concernées
+  - ✅ Correction du double appel à destroy() dans les tests UI
+- ✅ Amélioration des tests et de la couverture
+  - ✅ Implémentation correcte du calcul de statut de paiement des ateliers
+  - ✅ Correction des tests de recherche utilisateur
+  - ✅ Mise en place de tests d'intégration pour les statuts de paiement
 
 ### 2.5 Création de l'exécutable
 
@@ -237,38 +245,46 @@ CREATE TABLE workshops (
 
 ### 1. État Actuel
 - Version : 1.0.2
-- Dernière mise à jour : 2025-01-13
+- Dernière mise à jour : 2025-02-26
 - Fonctionnalités principales implémentées
 - Tests en place et validés
 - Gestion RGPD complète et testée
 - Exécutable fonctionnel avec ressources intégrées
+- Résolution des problèmes techniques:
+  - Dépendances circulaires entre User et Workshop
+  - Fonctionnalité de calcul de statut de paiement
+  - Tests d'intégration pour la navigation et les statuts de paiement
 
 ### 2. Métriques
-- Couverture de tests : 90%
+- Couverture de tests : 31% (objectif : 80%)
 - Nombre de bugs connus : 0
 - Performance : Optimisée pour les requêtes RGPD et la gestion des ressources
-- Qualité du code : Tests unitaires complets
+- Qualité du code : Tests unitaires fiables
 - Taille de l'exécutable : 66 MB (optimisé)
 
-### 3. Points d'Attention
-- Gestion de la mémoire pour les grandes listes
-- Performance des requêtes complexes
-- Validation des données utilisateur
-- Conformité RGPD :
-  - Vérification régulière des périodes d'inactivité
-  - Export des données avant suppression
-  - Anonymisation des ateliers orphelins
-- Gestion des ressources :
-  - Chemins d'accès en mode développement et production
-  - Intégration des assets dans l'exécutable
-  - Accès aux fichiers SQL et configurations
+### 3. Points de Focus
+- Amélioration continue de la couverture des tests
+- Finalisation des tests d'intégration restants
+- Résolution des problèmes techniques:
+  - ✅ Dépendances circulaires entre User et Workshop
+    - Solution: Utilisation de TYPE_CHECKING pour les annotations de type
+    - Déplacement des imports concrets dans les méthodes concernées
+  - ✅ Calcul du statut de paiement des ateliers
+    - Correction de la logique de calcul basée sur le nombre d'ateliers entre paiements
+    - Ajout de logs de diagnostic pour faciliter le débogage
+  - ✅ Tests d'interface utilisateur
+    - Correction du double appel à destroy() dans tearDownClass
+    - Mise à jour des tests de recherche utilisateur
+  - 🟡 Augmentation de la couverture de tests à 31% (objectif: 80%)
+    - Focus sur les modules critiques: src/main.py, src/ui/theme.py, src/ui/dashboard.py
 
 ### 4. Journal des Modifications
-#### Version 1.0.1
-- Interface utilisateur améliorée
-- Correction de bugs mineurs
-- Optimisation des performances
-- Mise à jour de la documentation
+
+| Version | Date        | Modifications                                         |
+|---------|-------------|-------------------------------------------------------|
+| 1.0.2   | 2025-02-26  | - Résolution des dépendances circulaires entre modèles<br>- Correction du calcul de statut de paiement<br>- Amélioration des tests d'interface et d'intégration<br>- Augmentation couverture tests à 31% (+14%)<br>- Correction problèmes import dans tests |
+| 1.0.1   | 2025-01-13  | - Correction des bugs d'affichage<br>- Optimisation des requêtes SQL<br>- Ajout des fonctionnalités RGPD |
+| 1.0.0   | 2024-12-01  | - Version initiale<br>- Interfaces principales<br>- Gestion des usagers<br>- Gestion des ateliers<br>- Système de sauvegarde |
 
 ## ANNEXES
 

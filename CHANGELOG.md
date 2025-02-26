@@ -5,6 +5,24 @@ Toutes les modifications notables de ce projet seront documentées dans ce fichi
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/),
 et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Non publié]
+
+### Ajouté
+  - Ajout de tests unitaires complémentaires pour améliorer la couverture du code :
+    - Tests unitaires pour le pattern Observer (test_observer.py) - 5/5 tests réussis
+    - Tests unitaires pour le gestionnaire de thèmes (test_theme.py) - 3/3 tests réussis
+    - Tests unitaires pour le module principal (test_main.py) - 8/8 tests réussis
+    - Tests unitaires pour le tableau de bord (test_dashboard.py) - 9/9 tests réussis
+    - Tests unitaires pour la gestion des utilisateurs (test_user_management.py) - 15/15 tests réussis
+    - Tests unitaires partiels pour le module d'importation/exportation CSV (test_csv_export.py)
+  - Création d'un script run_unit_tests.py pour exécuter de manière sélective les tests unitaires
+  - Mise à jour du rapport de tests (RAPPORT_TESTS.md) avec l'état actuel et les problèmes identifiés
+  - Amélioration significative de la couverture de tests de 38% à 52%
+
+### Problèmes identifiés
+  - Difficultés avec le mocking de datetime.now() dans les tests unitaires CSV
+  - Problèmes avec l'implémentation des tests d'interface utilisateur
+
 ## [1.0.2] - 2025-01-13
 
 ### Ajouté

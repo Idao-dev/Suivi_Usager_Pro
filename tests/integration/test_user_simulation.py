@@ -1,10 +1,10 @@
 # pour le lancer pytest tests/test_user_simulation.py
 import pytest
 import customtkinter as ctk
-from ui.main_window import MainWindow
-from database.db_manager import DatabaseManager
-from models.user import User
-from models.workshop import Workshop
+from src.ui.main_window import MainWindow
+from src.database.db_manager import DatabaseManager
+from src.models.user import User
+from src.models.workshop import Workshop
 import os
 import time
 
@@ -18,7 +18,12 @@ def main_window(app, tmp_path):
     db_path = tmp_path / "test_database.db"
     db_manager = DatabaseManager(str(db_path))
     db_manager.initialize()
-    window = MainWindow(app, db_manager=db_manager)
+    
+    # Fonction de rappel factice pour mise à jour
+    def update_callback():
+        pass
+    
+    window = MainWindow(app, db_manager=db_manager, update_callback=update_callback)
     window.pack(fill="both", expand=True)
     return window
 
@@ -42,8 +47,9 @@ def test_user_workflow(main_window):
     time.sleep(0.5)
     
     # Vérifier que l'utilisateur a été ajouté à la base de données
-    user = User.get_by_name(main_window.db_manager, "Dupont", "Jean")
-    assert user is not None, "L'utilisateur n'a pas été ajouté à la base de données"
+    results = main_window.db_manager.search_users("Dupont")
+    assert len(results) > 0, "L'utilisateur 'Dupont' n'a pas été trouvé dans la base de données"
+    user = results[0]  # Prendre le premier résultat
     
     # Afficher la liste des utilisateurs
     main_window.show_user_management()
@@ -53,20 +59,26 @@ def test_user_workflow(main_window):
     
     # Imprimer le contenu de la liste des utilisateurs pour le débogage
     print("Contenu de la liste des utilisateurs:")
-    for widget in main_window.user_management.user_list.winfo_children():
-        if isinstance(widget, ctk.CTkLabel):
-            print(widget.cget("text"))
+    for widget in main_window.user_management.users_frame.winfo_children():
+        if isinstance(widget, ctk.CTkFrame):
+            for child in widget.winfo_children():
+                if isinstance(child, ctk.CTkLabel):
+                    print(child.cget("text"))
     
     # Vérifier la présence de l'utilisateur dans la liste
     user_found = False
-    for widget in main_window.user_management.user_list.winfo_children():
-        if isinstance(widget, ctk.CTkLabel) and "Dupont" in widget.cget("text"):
-            user_found = True
-            break
+    for widget in main_window.user_management.users_frame.winfo_children():
+        if isinstance(widget, ctk.CTkFrame):
+            for child in widget.winfo_children():
+                if isinstance(child, ctk.CTkLabel) and "Dupont" in child.cget("text"):
+                    user_found = True
+                    break
     assert user_found, "L'utilisateur 'Dupont' n'a pas été trouvé dans la liste"
     
     # Simuler l'ouverture de l'édition de l'utilisateur
-    user = User.get_by_name(main_window.db_manager, "Dupont", "Jean")
+    results = main_window.db_manager.search_users("Dupont")
+    assert len(results) > 0, "L'utilisateur 'Dupont' n'a pas été trouvé dans la base de données"
+    user = results[0]  # Prendre le premier résultat
     main_window.edit_user(user)
     
     # Vérifier que le frame UserEditFrame est affiché
@@ -74,7 +86,7 @@ def test_user_workflow(main_window):
     
     # Simuler l'ajout d'un atelier pour cet utilisateur
     user_edit_frame = main_window.current_frame
-    user_edit_frame.show_add_workshop()
+    user_edit_frame.open_add_workshop()
     
     # Vérifier que le frame AddWorkshop est affiché
     assert isinstance(main_window.current_frame, main_window.add_workshop.__class__)
@@ -86,7 +98,7 @@ def test_user_workflow(main_window):
     # Vérifier que l'atelier a été ajouté
     main_window.show_workshop_history()
     workshop_found = False
-    for widget in main_window.workshop_history.workshop_list.winfo_children():
+    for widget in main_window.workshop_history.history_frame.winfo_children():
         if isinstance(widget, ctk.CTkLabel) and "Atelier test" in widget.cget("text"):
             workshop_found = True
             break
@@ -101,11 +113,17 @@ def test_user_workflow(main_window):
     # Vérifier la fonctionnalité de recherche
     main_window.search_entry.insert(0, "Dupont")
     main_window.search_users()
+    
+    # Attendre un peu pour que l'interface se mette à jour
+    time.sleep(0.5)
+    
     search_result_found = False
-    for widget in main_window.user_management.user_list.winfo_children():
-        if isinstance(widget, ctk.CTkLabel) and "Dupont" in widget.cget("text") and "Jean" in widget.cget("text"):
-            search_result_found = True
-            break
+    for widget in main_window.user_management.users_frame.winfo_children():
+        if isinstance(widget, ctk.CTkFrame):
+            for child in widget.winfo_children():
+                if isinstance(child, ctk.CTkLabel) and "Dupont" in child.cget("text") and "Jean" in child.cget("text"):
+                    search_result_found = True
+                    break
     assert search_result_found, "Le résultat de recherche pour 'Dupont Jean' n'a pas été trouvé"
     
     # Vérifier la fonctionnalité d'exportation CSV

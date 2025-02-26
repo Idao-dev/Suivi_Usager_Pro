@@ -1,12 +1,12 @@
 import unittest
-from utils.date_utils import is_valid_date, convert_to_db_date, convert_from_db_date
-from utils.csv_import_export import CSVExporter
-from .test_base import BaseTestCase
+from src.utils.date_utils import is_valid_date, convert_to_db_date, convert_from_db_date
+from src.utils.csv_import_export import CSVExporter
+from tests.test_base import BaseTestCase
 import os
 import tempfile
 import shutil
-from models.user import User
-from models.workshop import Workshop
+from src.models.user import User
+from src.models.workshop import Workshop
 
 class TestDateUtils(unittest.TestCase):
     def test_is_valid_date(self):
@@ -25,13 +25,17 @@ class TestCSVExport(BaseTestCase):
         super().setUp()
         # Créer un répertoire temporaire pour les exports de test
         self.temp_dir = tempfile.mkdtemp()
-        self.original_export_dir = CSVExporter.export_dir
-        CSVExporter.export_dir = self.temp_dir
+        # Créer un exportateur
+        self.exporter = CSVExporter(self.db_manager)
+        # Sauvegarde du répertoire d'export original
+        self.original_export_dir = self.exporter.export_dir
+        # Modification pour utiliser le répertoire temporaire
+        self.exporter.export_dir = self.temp_dir
 
     def tearDown(self):
-        # Restaurer le répertoire d'export original
-        CSVExporter.export_dir = self.original_export_dir
-        # Supprimer le répertoire temporaire et son contenu
+        # Restauration du répertoire d'export original
+        self.exporter.export_dir = self.original_export_dir
+        # Suppression du répertoire temporaire
         shutil.rmtree(self.temp_dir)
         super().tearDown()
 
@@ -40,8 +44,7 @@ class TestCSVExport(BaseTestCase):
         user = User(nom="Test", prenom="User", telephone="1234567890")
         user.save(self.db_manager)
         
-        exporter = CSVExporter(self.db_manager)
-        success, filepath = exporter.export_users()
+        success, filepath = self.exporter.export_users()
         self.assertTrue(success)
         self.assertTrue(os.path.exists(filepath))
         self.assertTrue(filepath.endswith('.csv'))
@@ -59,8 +62,7 @@ class TestCSVExport(BaseTestCase):
         workshop = Workshop(user_id=user.id, description="Test Workshop", categorie="Test", conseiller="Test Conseiller")
         workshop.save(self.db_manager)
         
-        exporter = CSVExporter(self.db_manager)
-        success, filepath = exporter.export_workshops()
+        success, filepath = self.exporter.export_workshops()
         self.assertTrue(success)
         self.assertTrue(os.path.exists(filepath))
         self.assertTrue(filepath.endswith('.csv'))
@@ -69,7 +71,7 @@ class TestCSVExport(BaseTestCase):
         # Vérifier le contenu du fichier
         with open(filepath, 'r', encoding='utf-8') as f:
             content = f.read()
-        self.assertIn('ID,User ID,Description,Catégorie,Payant,Date,Conseiller', content)
+        self.assertIn('ID,User ID,Description,Catégorie,Payant,Payé,Date,Conseiller', content)
 
 if __name__ == '__main__':
     unittest.main()
